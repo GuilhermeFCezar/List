@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Chá de Casa Nova 🏠</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #0f0f12; /* Preto/Preto Azulado bem escuro */
+            color: #e5e7eb;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 750px;
+            margin: 40px auto;
+            background: #16161a; /* Cinza escuro para contraste */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+            border: 1px solid #24242b;
+        }
+        h1 {
+            color: #ef4444; /* Vermelho vibrante */
+            text-align: center;
+            font-size: 2.3rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #9ca3af;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        .lista-itens {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .item-card {
+            background: #1f1f27;
+            border-left: 5px solid #ef4444; /* Borda Vermelha nos disponíveis */
+            padding: 20px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .item-card:hover {
+            transform: translateY(-2px);
+        }
+        /* Quando o item fica indisponível */
+        .item-card.indisponivel {
+            border-left-color: #4b5563; /* Borda vira cinza */
+            background: #141419;
+            opacity: 0.5;
+        }
+        .item-info .item-nome {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .item-info .item-status {
+            font-size: 0.85rem;
+            color: #ef4444;
+            margin-top: 4px;
+            font-weight: bold;
+        }
+        .item-card.indisponivel .item-status {
+            color: #9ca3af;
+        }
+        .form-reserva {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .form-reserva input {
+            background: #0f0f12;
+            border: 1px solid #374151;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        /* Foco do input em Azul */
+        .form-reserva input:focus {
+            border-color: #2563eb; 
+        }
+        .btn-reservar {
+            background: #ef4444; /* Botão Vermelho */
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        /* Botão fica Azul ao passar o mouse */
+        .btn-reservar:hover {
+            background: #2563eb; 
+        }
+        .badge-escolhido {
+            background: #24242b;
+            color: #9ca3af;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        /* Responsividade para celular */
+        @media (max-width: 600px) {
+            .item-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .form-reserva {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chá de Casa Nova</h1>
+        <p class="subtitle">Ficamos muito felizes em dividir esse momento com você! Escolha um item abaixo para nos presentear:</p>
+        
+        <div class="lista-itens">
+            {% for item in itens %}
+                <div class="item-card {% if item[2] == 0 %}indisponivel{% endif %}">
+                    <div class="item-info">
+                        <div class="item-nome">{{ item[1] }}</div>
+                        <div class="item-status">
+                            {% if item[2] == 1 %} Disponível {% else %} Reservado {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if item[2] == 1 %}
+                        <form class="form-reserva" action="{{ url_for('escolher', id=item[0]) }}" method="POST">
+                            <input type="text" name="nome" placeholder="Seu Nome" required>
+                            <input type="text" name="telefone" placeholder="Seu Telefone" required>
+                            <button type="submit" class="btn-reservar">Quero Dar Esse</button>
+                        </form>
+                    {% else %}
+                        <div class="badge-escolhido">Já Escolhido! ✔</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
