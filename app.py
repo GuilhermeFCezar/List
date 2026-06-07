@@ -4,7 +4,6 @@ from flask import Flask, redirect, render_template, request, url_for
 
 app = Flask(__name__)
 
-# Configuração do caminho absoluto para o banco de dados (Evita perda de dados)
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(BASE_DIR, "presentes.db")
 
@@ -12,36 +11,29 @@ DB_PATH = os.path.join(BASE_DIR, "presentes.db")
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    # Cria a tabela se ela não existir
+    # Adicionada a coluna 'imagem' no banco de dados
     c.execute(
         """CREATE TABLE IF NOT EXISTS itens
-                 (id INTEGER PRIMARY KEY, nome TEXT, disponivel INTEGER, doador TEXT, telefone TEXT)"""
+                 (id INTEGER PRIMARY KEY, nome TEXT, imagem TEXT, disponivel INTEGER, doador TEXT, telefone TEXT)"""
     )
 
-    # Verifica se a tabela está vazia para colocar os presentes iniciais
     c.execute("SELECT COUNT(*) FROM itens")
     if c.fetchone()[0] == 0:
+        # Lista agora contém (Nome do Item, Link da Imagem)
+        # Usei imagens genéricas do site Unsplash para você testar
         itens_iniciais = [
-            "Jogo de Panelas",
-            "Liquidificador",
-            "Fritadeira Elétrica (Airfryer)",
-            "Faqueiro Completo",
-            "Jogo de Pratos (Raso/Fundo)",
-            "Jogo de Copos de Vidro",
-            "Jogo de Toalhas de Banho",
-            "Kit de Panos de Prato",
-            "Assadeiras de Vidro (Marinex)",
-            "Garrafa Térmica + Coador",
-            "Kit de Utensílios de Silicone",
-            "Aparelho de Jantar",
-            "Varal de Chão",
-            "Mimos de Decoração / Almofadas",
-            "Jogo de Cama (Casal)",
+            ("Jogo de Panelas", "https://images.unsplash.com/photo-1584990347449-a6e81cbce126?w=200&q=80"),
+            ("Liquidificador Imperial", "https://images.unsplash.com/photo-1585237672814-8f85a8129dd6?w=200&q=80"),
+            ("Airfryer (Estrela da Morte)", "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=200&q=80"),
+            ("Faqueiro Completo", "https://images.unsplash.com/photo-1581428982868-e410dd047a90?w=200&q=80"),
+            ("Jogo de Pratos Negros", "https://images.unsplash.com/photo-1610055106191-4cf106daaa20?w=200&q=80"),
+            ("Taças de Vinho Elegantes", "https://images.unsplash.com/photo-1584916201218-f4242ceb4809?w=200&q=80"),
+            ("Jogo de Cama (Casal)", "https://images.unsplash.com/photo-1522771731478-44bf10cb334f?w=200&q=80"),
         ]
-        for item in itens_iniciais:
+        for nome, imagem in itens_iniciais:
             c.execute(
-                "INSERT INTO itens (nome, disponivel, doador, telefone) VALUES (?, 1, '', '')",
-                (item,),
+                "INSERT INTO itens (nome, imagem, disponivel, doador, telefone) VALUES (?, ?, 1, '', '')",
+                (nome, imagem),
             )
         conn.commit()
     conn.close()
@@ -51,8 +43,8 @@ def init_db():
 def index():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    # Busca todos os itens cadastrados
-    c.execute("SELECT id, nome, disponivel, doador FROM itens")
+    # Agora buscamos a imagem também
+    c.execute("SELECT id, nome, imagem, disponivel, doador FROM itens")
     itens = c.fetchall()
     conn.close()
     return render_template("index.html", itens=itens)
@@ -66,8 +58,6 @@ def escolher(id):
     if nome and telefone:
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-
-        # Segurança extra: Verifica se o item ainda está disponível antes de atualizar
         c.execute("SELECT disponivel FROM itens WHERE id=?", (id,))
         item_status = c.fetchone()
 
